@@ -67,7 +67,7 @@ def extract_article_urls(site_urls, lim=10):
 
 def download_article(url):
     try:
-      article = Article(url)
+      article = Article(url, browser_user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36", fetch_images=False)
       article.download()
       article.parse()
       article.nlp()
