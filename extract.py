@@ -14,7 +14,7 @@ def save_pickle(data, name):
     name += str(inc)
   while os.path.isfile('data/{}.pkl'.format(name)):
     inc += 1
-    name[-1] = str(inc)
+    name = name[:-1] + str(inc)
   print('Saving to {}'.format(name))
   with open('data/{}.pkl'.format(name), 'wb') as f:
     dill.dump(data, f)
@@ -99,7 +99,7 @@ def scrape_articles(links):
         if a and len(a['text']) > 100:
           articles.append(a)
           print('Downloaded article: {}'.format(a['title']))
-        if len(articles) > 100:
+        if len(articles) > 50:
           yield articles
           articles = []
     yield articles
