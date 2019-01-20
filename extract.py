@@ -9,6 +9,13 @@ import dill
 import os
 
 def save_pickle(data, name):
+  inc = 1
+  if os.path.isfile('data/{}.pkl'.format(name)):
+    name += str(inc)
+  while os.path.isfile('data/{}.pkl'.format(name)):
+    inc += 1
+    name[-1] = str(inc)
+  print('Saving to {}'.format(name))
   with open('data/{}.pkl'.format(name), 'wb') as f:
     dill.dump(data, f)
 
@@ -58,7 +65,7 @@ def get_site_roots(urls, words):
 
 def extract_article_urls(site_urls):
     article_urls = []
-    for site_url in site_urls: 
+    for site_url in site_urls[:10]: 
         paper = newspaper.build(site_url)
         urls = [a.url for a in paper.articles if '-' in a.url]
         print('Found {} articles on {}'.format(len(urls) ,site_url))
@@ -71,7 +78,6 @@ def download_article(url):
       article.download()
       article.parse()
       article.nlp()
-      print('Downloaded article: {}'.format(article.title))
       return {
           'title': article.title,
           'authors': article.authors,
@@ -90,13 +96,13 @@ def scrape_articles(links):
     articles = []
     for url in links:
         a = download_article(url)
-        if a and len(a['text']) > 500:
+        if a and len(a['text']) > 100:
           articles.append(a)
-    return articles
-
-def save_pickle(data, name):
-  with open('data/{}.pkl'.format(name), 'wb') as f:
-    dill.dump(data, f)
+          print('Downloaded article: {}'.format(a['title']))
+        if len(articles) > 10:
+          yield articles
+          articles = []
+    yield articles
 
 def master_extract(bias):
 
@@ -116,8 +122,8 @@ def master_extract(bias):
   if has_data('{}_articles'.format(bias)):
     articles = load_pickle('{}_articles'.format(bias))
   else:
-    articles = scrape_articles(article_urls)
-    save_pickle(articles, '{}_articles'.format(bias))
+    for articles in scrape_articles(article_urls):
+      save_pickle(articles, '{}_articles'.format(bias))
 
 master_extract(sys.argv[1])
 
