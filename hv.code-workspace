@@ -1,0 +1,6 @@
+{
+    "folders": [{
+        "uri": "sftp://ubuntu@hypervault.tech/home/ubuntu/balance-the-news?key=/Users/lixiii/.ssh/id_rsa",
+        "name": "hypervault"
+    }]
+}
