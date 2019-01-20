@@ -14,7 +14,7 @@ def save_pickle(data, name):
     name += str(inc)
   while os.path.isfile('data/{}.pkl'.format(name)):
     inc += 1
-    name[-1] = str(inc)
+    name = name[:-1] + str(inc)
   print('Saving to {}'.format(name))
   with open('data/{}.pkl'.format(name), 'wb') as f:
     dill.dump(data, f)
@@ -65,7 +65,7 @@ def get_site_roots(urls, words):
 
 def extract_article_urls(site_urls):
     article_urls = []
-    for site_url in site_urls[:10]: 
+    for site_url in site_urls: 
         paper = newspaper.build(site_url)
         urls = [a.url for a in paper.articles if '-' in a.url]
         print('Found {} articles on {}'.format(len(urls) ,site_url))
@@ -99,7 +99,7 @@ def scrape_articles(links):
         if a and len(a['text']) > 100:
           articles.append(a)
           print('Downloaded article: {}'.format(a['title']))
-        if len(articles) > 100:
+        if len(articles) > 50:
           yield articles
           articles = []
     yield articles
