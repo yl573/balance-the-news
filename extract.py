@@ -99,7 +99,7 @@ def scrape_articles(links):
         if a and len(a['text']) > 100:
           articles.append(a)
           print('Downloaded article: {}'.format(a['title']))
-        if len(articles) > 10:
+        if len(articles) > 100:
           yield articles
           articles = []
     yield articles
