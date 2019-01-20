@@ -1,3 +1,4 @@
+
 from requests_html import HTMLSession
 import numpy as np
 import re
@@ -33,17 +34,6 @@ def extract_site_urls(root_url):
             
     return site_urls, site_name_words
 
-
-def get_site_roots(urls, words, lim=10):
-    site_roots = []
-    for url, site_words in zip(urls[:lim], words[:lim]):
-        root = get_cite_root_for_url(url, site_words)
-        if root:
-            site_roots.append(root)
-            print('Found site root {}'.format(root))
-    return site_roots
-
-
 def get_cite_root_for_url(url, cite_words):
     session = HTMLSession()
     r = session.get(url)
@@ -57,18 +47,71 @@ def get_cite_root_for_url(url, cite_words):
     min_id = np.argmin(lengths)
     return links[min_id]
 
+def get_site_roots(urls, words):
+    site_roots = []
+    for url, site_words in zip(urls, words):
+        root = get_cite_root_for_url(url, site_words)
+        if root:
+            site_roots.append(root)
+            print('Found site root {}'.format(root))
+    return site_roots
 
-def master_extract(bias, lim):
+def extract_article_urls(site_urls):
+    article_urls = []
+    for site_url in site_urls: 
+        paper = newspaper.build(site_url)
+        urls = [a.url for a in paper.articles if '-' in a.url]
+        print('Found {} articles on {}'.format(len(urls) ,site_url))
+        article_urls += urls 
+    return article_urls
+
+def download_article(url):
+    try:
+      article = Article(url, browser_user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36", fetch_images=False)
+      article.download()
+      article.parse()
+      article.nlp()
+      print('Downloaded article: {}'.format(article.title))
+      return {
+          'title': article.title,
+          'authors': article.authors,
+          'date': article.publish_date,
+          'text': article.text,
+          'keywords': article.keywords,
+          'summary': article.summary,
+          'link': url,
+      }
+    except Exception as ex:
+      print('Download failed: {}'.format(url))
+      print(ex)
+      return None
+
+def scrape_articles(links):
+    articles = []
+    for url in links:
+        a = download_article(url)
+        if a and len(a['text']) > 500:
+          articles.append(a)
+    return articles
+
+def save_pickle(data, name):
+  with open('data/{}.pkl'.format(name), 'wb') as f:
+    dill.dump(data, f)
+
+def master_extract(bias):
+
   if has_data('{}_sites'.format(bias)):
     site_roots = load_pickle('{}_sites'.format(bias))
   else:
     urls, words = extract_site_urls('https://mediabiasfactcheck.com/{}/'.format(bias))
-    site_roots = get_site_roots(urls, words, lim=lim)
+    site_roots = get_site_roots(urls, words)
     save_pickle(site_roots, '{}_sites'.format(bias))
 
+  if has_data('{}_urls'.format(bias)):
+    article_urls = load_pickle('{}_urls'.format(bias))
+  else:
+    article_urls = extract_article_urls(site_roots)
+    save_pickle(article_urls, '{}_urls'.format(bias))
 
-if len(sys.argv) == 2:
-  master_extract(sys.argv[1])
-elif len(sys.argv) == 3:
-  master_extract(sys.argv[1], int(sys.argv[2]))
+master_extract(sys.argv[1])
 
