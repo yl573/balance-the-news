@@ -1,0 +1,6 @@
+{
+    "folders": [{
+        "uri": "sftp://ubuntu@hc2.lixiii.com/home/ubuntu/?key=/Users/lixiii/.ssh/id_rsa",
+        "name": "hc2"
+    }]
+}

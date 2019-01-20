@@ -10,8 +10,8 @@ import os
 import json
 from pprint import pprint
 
-def loadJSON(data):
-  with open('data.json') as f:
+def loadJSON(name):
+  with open(name) as f:
     return json.load(f)
 
 def save_pickle(data, name):
