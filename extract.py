@@ -65,7 +65,7 @@ def get_site_roots(urls, words):
 
 def extract_article_urls(site_urls):
     article_urls = []
-    for site_url in site_urls[:10]: 
+    for site_url in site_urls: 
         paper = newspaper.build(site_url)
         urls = [a.url for a in paper.articles if '-' in a.url]
         print('Found {} articles on {}'.format(len(urls) ,site_url))
