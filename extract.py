@@ -80,8 +80,9 @@ def download_article(url):
           'keywords': article.keywords,
           'summary': article.summary
       }
-    except:
+    except Exception as ex:
       print('Download failed: {}'.format(url))
+      print(ex);\
       return None
 
 def scrape_articles(links, lim=10):
